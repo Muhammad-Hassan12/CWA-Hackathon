@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Check, Copy, ShieldCheck, AlertTriangle, ArrowLeft, Clock, GitBranch } from 'lucide-react';
+import { Check, Copy, ShieldCheck, AlertTriangle, ArrowLeft, Clock, GitBranch, ExternalLink } from 'lucide-react';
 import AgentTraceModal from './AgentTraceModal';
-import { formatDraftText } from '../lib/formatText';
+import FormattedDocument from './FormattedDocument';
+import { formatDraftText, stripMarkdownAsterisks } from '../lib/formatText';
 
 export default function BillAuditReceipt({ bill, onReset }) {
   const [copied, setCopied] = useState(false);
@@ -28,7 +29,7 @@ export default function BillAuditReceipt({ bill, onReset }) {
 
   const copyDispute = () => {
     if (cleanDispute) {
-      navigator.clipboard.writeText(cleanDispute);
+      navigator.clipboard.writeText(stripMarkdownAsterisks(cleanDispute));
       setDisputeCopied(true);
       setTimeout(() => setDisputeCopied(false), 2000);
     }
@@ -201,21 +202,7 @@ export default function BillAuditReceipt({ bill, onReset }) {
             </button>
           </div>
 
-          <pre
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--line)',
-              padding: '1.25rem',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.85rem',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'var(--font-sans)',
-              color: 'var(--ink)',
-            }}
-          >
-            {cleanDispute}
-          </pre>
+          <FormattedDocument text={cleanDispute} />
         </div>
       )}
 
@@ -225,9 +212,22 @@ export default function BillAuditReceipt({ bill, onReset }) {
           <ArrowLeft size={15} />
           Audit Another Bill
         </button>
-        <span className="mono-num text-muted" style={{ fontSize: '0.8rem' }}>
-          Source: NEPRA Official Gazette · Effective July 2024
-        </span>
+        <a
+          href="https://nepra.org.pk/tariff/tariff.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            fontSize: '0.8rem',
+            color: 'var(--ink)',
+            textDecoration: 'underline',
+          }}
+        >
+          NEPRA Official Tariff Gazette (July 2024)
+          <ExternalLink size={12} />
+        </a>
       </div>
 
       {showTraceModal && (

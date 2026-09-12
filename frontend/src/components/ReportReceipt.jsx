@@ -9,10 +9,12 @@ import {
   AlertCircle,
   CheckCircle2,
   GitBranch,
+  ExternalLink,
 } from 'lucide-react';
 import AgentTraceModal from './AgentTraceModal';
+import FormattedDocument from './FormattedDocument';
 import { markReportResolved } from '../lib/api';
-import { formatDraftText } from '../lib/formatText';
+import { formatDraftText, stripMarkdownAsterisks } from '../lib/formatText';
 
 export default function ReportReceipt({ report, onReset }) {
   const [copied, setCopied] = useState(false);
@@ -33,7 +35,7 @@ export default function ReportReceipt({ report, onReset }) {
 
   const copyComplaint = () => {
     if (cleanComplaint) {
-      navigator.clipboard.writeText(cleanComplaint);
+      navigator.clipboard.writeText(stripMarkdownAsterisks(cleanComplaint));
       setComplaintCopied(true);
       setTimeout(() => setComplaintCopied(false), 2000);
     }
@@ -132,20 +134,55 @@ export default function ReportReceipt({ report, onReset }) {
       </div>
 
       {/* Matched Authority Mandate */}
-      {report.matched_authority && (
-        <div style={{ border: '1px solid var(--line)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <Building2 size={16} color="var(--ink)" />
-            <strong style={{ fontSize: '0.9rem' }}>Jurisdictional Authority Mandated:</strong>
+      {report.matched_authority && (() => {
+        const authName = (report.matched_authority.authority_name || '').toLowerCase();
+        let portalUrl = 'https://sindh.gov.pk';
+        if (authName.includes('sswmb') || authName.includes('solid waste')) portalUrl = 'https://sswmb.gos.pk';
+        else if (authName.includes('kwsc') || authName.includes('kwsb') || authName.includes('water')) portalUrl = 'https://www.kwsc.gos.pk';
+        else if (authName.includes('kmc') || authName.includes('metropolitan')) portalUrl = 'https://kmc.gos.pk';
+        else if (authName.includes('cbc') || authName.includes('cantonment')) portalUrl = 'https://cbc.gov.pk';
+        else if (authName.includes('electric') || authName.includes('ke')) portalUrl = 'https://www.ke.com.pk';
+
+        return (
+          <div style={{ border: '1px solid var(--line)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', background: '#FFFFFF' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <Building2 size={16} color="var(--ink)" />
+                  <strong style={{ fontSize: '0.9rem' }}>Jurisdictional Authority Mandated:</strong>
+                </div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--ink)' }}>
+                  {report.matched_authority.authority_name}
+                </div>
+                <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                  {report.matched_authority.contact_info}
+                </div>
+              </div>
+
+              <a
+                href={portalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  fontSize: '0.78rem',
+                  color: 'var(--ink)',
+                  textDecoration: 'underline',
+                  padding: '0.25rem 0.5rem',
+                  border: '1px solid var(--line)',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--paper)',
+                }}
+              >
+                Official Authority Portal
+                <ExternalLink size={12} />
+              </a>
+            </div>
           </div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--ink)' }}>
-            {report.matched_authority.authority_name}
-          </div>
-          <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
-            {report.matched_authority.contact_info}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Drafted Complaint or Processing Status */}
       <div style={{ marginBottom: '1.5rem' }}>
@@ -160,21 +197,7 @@ export default function ReportReceipt({ report, onReset }) {
         </div>
 
         {cleanComplaint ? (
-          <pre
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--line)',
-              padding: '1.25rem',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.85rem',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'var(--font-sans)',
-              color: 'var(--ink)',
-            }}
-          >
-            {cleanComplaint}
-          </pre>
+          <FormattedDocument text={cleanComplaint} />
         ) : (
           <div style={{ border: '1px solid var(--line)', padding: '1.5rem', textAlign: 'center', borderRadius: 'var(--radius-sm)' }}>
             <Clock size={24} color="var(--muted)" style={{ margin: '0 auto 0.5rem' }} />

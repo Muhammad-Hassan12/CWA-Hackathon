@@ -21,14 +21,290 @@ const TUNNEL_HEADERS = {
   'ngrok-skip-browser-warning': 'true',
 };
 
+const INITIAL_PROCEDURES = [
+  {
+    id: 'cnic-renewal',
+    name: 'CNIC Renewal (NADRA)',
+    category: 'Identity & Civil Status',
+    description: 'Official standard and urgent renewal of Computerized National Identity Cards (CNIC) / Smart National Identity Cards (SNIC) for Pakistani citizens residing in Karachi.',
+    last_verified_at: '2026-01-15',
+    source_url: 'https://www.nadra.gov.pk/identity/identity-cnic/',
+    required_documents: [
+      {
+        id: 'doc-cnic-1',
+        document_name: 'Original Expired CNIC / SNIC',
+        notes: 'Must be handed over for punching/cancellation upon collection of new card',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-cnic-2',
+        document_name: 'Photocopy of Parent or Spouse CNIC',
+        notes: 'Used for computerized biometric cross-verification with NADRA database',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-cnic-3',
+        document_name: 'Proof of Address Update (Utility bill or Registered Tenancy / Lease Agreement)',
+        notes: 'Only mandatory if your permanent or current residential address is being updated',
+        is_mandatory: false,
+      },
+      {
+        id: 'doc-cnic-4',
+        document_name: 'Marriage Certificate / Nikkahnama (for married females updating status)',
+        notes: 'Mandatory if updating marital status from single to married',
+        is_mandatory: false,
+      },
+    ],
+    authorities: [
+      {
+        id: 'auth-cnic-1',
+        office_name: 'NADRA Mega Center DHA Phase 4',
+        address: 'Main Korangi Road, Phase 4, Defence Housing Authority, Karachi',
+        hours_text: 'Open 24 Hours / 7 Days a week',
+        contact_info: 'Helpline: 1777 (mobile) | +92-51-111-786-100',
+      },
+      {
+        id: 'auth-cnic-2',
+        office_name: 'NADRA Mega Center North Nazimabad',
+        address: 'Block L, Near Sakhi Hassan Chowrangi, North Nazimabad, Karachi',
+        hours_text: 'Open 24 Hours / 7 Days a week',
+        contact_info: 'Helpline: 1777',
+      },
+      {
+        id: 'auth-cnic-3',
+        office_name: 'NADRA Mega Center Siemens Chowrangi',
+        address: 'Estate Avenue, SITE Area, Near Siemens Chowrangi, Karachi',
+        hours_text: 'Open 24 Hours / 7 Days a week',
+        contact_info: 'Helpline: 1777',
+      },
+    ],
+    roadmap_steps: [
+      {
+        id: 'step-cnic-1',
+        step_order: 1,
+        description: 'Token Issuance: Enter facility and receive electronic queue token from the computerized reception window.',
+        estimated_duration: '5 mins',
+      },
+      {
+        id: 'step-cnic-2',
+        step_order: 2,
+        description: 'Biometric Capture: Automated digital photograph, all ten fingerprints, and iris scan at designated booth.',
+        estimated_duration: '8 mins',
+      },
+      {
+        id: 'step-cnic-3',
+        step_order: 3,
+        description: 'Data Entry & Confirmation: Operator verifies personal details on bilingual screen. Review and sign printed draft form.',
+        estimated_duration: '10 mins',
+      },
+      {
+        id: 'step-cnic-4',
+        step_order: 4,
+        description: 'Attestation / Exemption: If both biometric scans match family tree, physical gazette attestation is waived. Otherwise, get form attested by Grade 17+ officer.',
+        estimated_duration: 'Conditional',
+      },
+      {
+        id: 'step-cnic-5',
+        step_order: 5,
+        description: 'Tracking Voucher Issuance: Receive stamped payment and tracking receipt containing your unique 11-digit NADRA tracking code.',
+        estimated_duration: '2 mins',
+      },
+    ],
+  },
+  {
+    id: 'sindh-domicile',
+    name: 'Sindh Domicile & PRC Certificate',
+    category: 'Citizenship & Residence',
+    description: 'Statutory issuance of Permanent Resident Certificate (PRC Form P-1) and Domicile Certificate by the Government of Sindh District Administration for admissions, exams, and government employment.',
+    last_verified_at: '2026-02-01',
+    source_url: 'https://commissionerkarachi.gos.pk/',
+    required_documents: [
+      {
+        id: 'doc-dom-1',
+        document_name: 'Original CNIC / Form-B of Applicant + 2 Attested Copies',
+        notes: 'Attested by Grade 17+ Government Gazette Officer',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-dom-2',
+        document_name: 'Father / Guardian CNIC + Sindh Domicile & PRC Copy',
+        notes: 'Mandatory to substantiate domicile by descent',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-dom-3',
+        document_name: 'Five (5) Passport Size Photographs with White Background',
+        notes: 'Two attested on front, two on reverse',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-dom-4',
+        document_name: 'Educational Certificates (Matriculation Certificate / Marks Sheet)',
+        notes: 'Showing school attended in Karachi to establish uninterrupted physical residence',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-dom-5',
+        document_name: 'Recent Electricity or Sui Gas Utility Bill of Karachi Residence',
+        notes: 'Bill from last 3 months bearing the residential address claimed in application',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-dom-6',
+        document_name: 'Attested Stamp Paper Affidavit (Rs. 100/50)',
+        notes: 'Declaring applicant does not possess domicile of any other district/province, signed before Oath Commissioner',
+        is_mandatory: true,
+      },
+    ],
+    authorities: [
+      {
+        id: 'auth-dom-1',
+        office_name: 'Deputy Commissioner (DC) Office South',
+        address: '4th Floor, Sindh Secretariat Building No. 2, Kamal Ataturk Road, Karachi',
+        hours_text: 'Monday - Friday, 09:00 AM - 04:00 PM',
+        contact_info: 'Phone: +92-21-99208000 | Email: dc.south@sindh.gov.pk',
+      },
+      {
+        id: 'auth-dom-2',
+        office_name: 'Deputy Commissioner (DC) Office Korangi',
+        address: 'Sector 31-D, Near Bilal Chowrangi, Korangi Industrial Area, Karachi',
+        hours_text: 'Monday - Friday, 09:00 AM - 04:00 PM',
+        contact_info: 'Phone: +92-21-99333900 | Email: dc.korangi@sindh.gov.pk',
+      },
+      {
+        id: 'auth-dom-3',
+        office_name: 'Deputy Commissioner (DC) Office East',
+        address: 'Block 14, Gulshan-e-Iqbal, Near Civic Center, Karachi',
+        hours_text: 'Monday - Friday, 09:00 AM - 04:00 PM',
+        contact_info: 'Phone: +92-21-99230555',
+      },
+    ],
+    roadmap_steps: [
+      {
+        id: 'step-dom-1',
+        step_order: 1,
+        description: 'Affidavit Attestation & File Preparation: Purchase official Domicile file docket and print statutory affidavit on Rs. 100 legal stamp paper. Sign in presence of Oath Commissioner.',
+        estimated_duration: '30-45 mins',
+      },
+      {
+        id: 'step-dom-2',
+        step_order: 2,
+        description: 'Assistant Commissioner (AC) Endorsement: Visit the Assistant Commissioner sub-division office for preliminary document verification and signature on Form P-1.',
+        estimated_duration: '1-2 business days',
+      },
+      {
+        id: 'step-dom-3',
+        step_order: 3,
+        description: 'DC Citizen Facilitation Counter Submission: Submit verified file with fee payment challan (NBP official fee Rs 200) at Deputy Commissioner Citizen Service Window.',
+        estimated_duration: '30 mins',
+      },
+      {
+        id: 'step-dom-4',
+        step_order: 4,
+        description: 'Police Verification & Administrative Background Check: Verification and final DC seal signature.',
+        estimated_duration: '3-5 business days',
+      },
+      {
+        id: 'step-dom-5',
+        step_order: 5,
+        description: 'Collection: Collect original sealed green Domicile Certificate and PRC Form P-1 upon presenting stamped submission voucher.',
+        estimated_duration: '5 mins',
+      },
+    ],
+  },
+  {
+    id: 'driving-license',
+    name: 'Driving License Renewal (Sindh Police)',
+    category: 'Transport & Licensing',
+    description: 'Official statutory renewal process for non-commercial (Motorcycle / Motorcar M/Car) computerized driving licenses issued by the Sindh Police Driving License Branch.',
+    last_verified_at: '2026-02-10',
+    source_url: 'https://dls.sindhpolice.gov.pk/',
+    required_documents: [
+      {
+        id: 'doc-lic-1',
+        document_name: 'Original Expired Driving License',
+        notes: 'Must be surrendered or physically inspected by licensing authority',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-lic-2',
+        document_name: 'Valid Original CNIC + 2 Attested Photocopies',
+        notes: 'Must show Karachi residential address or Sindh address',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-lic-3',
+        document_name: 'Medical Fitness Certificate (Form B)',
+        notes: 'Mandatory for drivers aged 50+; issued by on-site Sindh Police medical doctor',
+        is_mandatory: true,
+      },
+      {
+        id: 'doc-lic-4',
+        document_name: 'Three (3) Passport Size Photographs',
+        notes: 'Passport size with light blue or white background',
+        is_mandatory: true,
+      },
+    ],
+    authorities: [
+      {
+        id: 'auth-lic-1',
+        office_name: 'Sindh Police Driving License Branch Clifton',
+        address: 'Khayaban-e-Roomi, Block 8, Clifton, Near Do Talwar, Karachi',
+        hours_text: 'Monday - Saturday, 08:30 AM - 03:30 PM (Friday break 1-2 PM)',
+        contact_info: 'Helpline: 1915 | Phone: +92-21-99250524',
+      },
+      {
+        id: 'auth-lic-2',
+        office_name: 'Sindh Police Driving License Branch Nazimabad',
+        address: 'Block 7, Subzi Mandi Road, Nazimabad, Karachi',
+        hours_text: 'Monday - Saturday, 08:30 AM - 03:30 PM',
+        contact_info: 'Phone: +92-21-99260566',
+      },
+      {
+        id: 'auth-lic-3',
+        office_name: 'Sindh Police Driving License Branch Korangi',
+        address: 'Sector 31-D, Korangi Industrial Area, Near Brooks Chowrangi, Karachi',
+        hours_text: 'Monday - Saturday, 08:30 AM - 03:30 PM',
+        contact_info: 'Phone: +92-21-35050555',
+      },
+    ],
+    roadmap_steps: [
+      {
+        id: 'step-lic-1',
+        step_order: 1,
+        description: 'Physical Token & Medical Window: Present original expired license and CNIC at reception. Undergo on-site eye & basic physical fitness examination.',
+        estimated_duration: '15 mins',
+      },
+      {
+        id: 'step-lic-2',
+        step_order: 2,
+        description: 'Biometrics & Digital Signature: High-resolution digital photograph, digital signature tablet capture, and fingerprint scan.',
+        estimated_duration: '10 mins',
+      },
+      {
+        id: 'step-lic-3',
+        step_order: 3,
+        description: 'Government Fee Payment: Pay official statutory fee (3-year or 5-year renewal challan) at on-site National Bank of Pakistan branch booth.',
+        estimated_duration: '10 mins',
+      },
+      {
+        id: 'step-lic-4',
+        step_order: 4,
+        description: 'Voucher & Urgent Delivery: Receive computerized stamped payment slip which serves as a valid 30-day provisional driving permit.',
+        estimated_duration: '5 mins',
+      },
+    ],
+  },
+];
+
 export default function ProcedureGuideView() {
-  const [procedures, setProcedures] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+  const [procedures, setProcedures] = useState(INITIAL_PROCEDURES);
+  const [selectedId, setSelectedId] = useState('cnic-renewal');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [gateNotice, setGateNotice] = useState(null);
   const [checkedDocs, setCheckedDocs] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Exploitation signal modal state
   const [showSignalModal, setShowSignalModal] = useState(false);
@@ -44,7 +320,7 @@ export default function ProcedureGuideView() {
         const data = await fetchProcedures();
         if (data && data.length > 0) {
           setProcedures(data);
-          setSelectedId(data[0].id);
+          if (!selectedId) setSelectedId(data[0].id);
         }
       } catch (err) {
         console.warn('Error fetching procedures:', err);
@@ -54,6 +330,7 @@ export default function ProcedureGuideView() {
     };
     loadProcedures();
   }, []);
+
 
   const activeProcedure = procedures.find((p) => p.id === selectedId) || procedures[0];
 

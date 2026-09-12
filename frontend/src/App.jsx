@@ -126,35 +126,35 @@ export default function App() {
                 tariff_category: 'Residential-Unprotected',
                 units_billed: 312,
                 amount_billed: 14850,
-                amount_expected: 10724,
+                amount_expected: 8921.42,
                 verdict: 'flagged',
-                overcharge_pct: 38,
+                overcharge_pct: 66.5,
                 math_breakdown: {
                   units_billed: 312,
                   tariff_category: 'Residential-Unprotected',
-                  energy_charges: 8392.5,
+                  energy_charges: 7041.36,
                   fixed_charge: 400.0,
-                  electricity_duty: 131.89,
+                  electricity_duty: 105.62,
                   tv_fee: 35.0,
-                  gst: 1582.65,
-                  total_expected: 10724.0,
+                  gst: 1339.44,
+                  total_expected: 8921.42,
                   amount_billed: 14850.0,
-                  discrepancy: 4126.0,
-                  overcharge_pct: 38.5,
+                  discrepancy: 5928.58,
+                  overcharge_pct: 66.5,
                   slab_breakdown: [
-                    { slab: '1 - 100', units: 100, rate: 16.48, cost: 1648.0 },
-                    { slab: '101 - 200', units: 100, rate: 22.95, cost: 2295.0 },
-                    { slab: '201 - 300', units: 100, rate: 27.14, cost: 2714.0 },
-                    { slab: '301 - 400', units: 12, rate: 32.03, cost: 384.36 },
+                    { slab: '001–100 units', units: 100, rate: 16.48, cost: 1648.0 },
+                    { slab: '101–200 units', units: 100, rate: 22.95, cost: 2295.0 },
+                    { slab: '201–300 units', units: 100, rate: 27.14, cost: 2714.0 },
+                    { slab: '301–400 units', units: 12, rate: 32.03, cost: 384.36 },
                   ]
                 },
-                drafted_complaint: 'FORMAL BILLING DISPUTE NOTICE\nUnder NEPRA Consumer Service Manual (CSM) Clause 11\nTo: Billing Dispute Resolution Cell, K-Electric Limited\nRe: Unauthorized Overcharge on 312 Units (Tracking: KE-2026-8812)\n\nAudit reveals statutory charges of Rs. 10,724 versus billed amount of Rs. 14,850, representing an unauthorized overbilling of Rs. 4,126.\n\nخلاصہ برائے صارفین تنازعات سیل:\nنیپرا کے منظور شدہ ٹیرف شیڈول کے مطابق 312 یونٹس پر اصل بل 10,724 روپے بنتا ہے جبکہ کے-الیکٹرک نے غیر قانونی طور پر 14,850 روپے بل کیا ہے۔ 4,126 روپے کا اضافی بل فوری طور پر درست کیا جائے۔\n\nTracking ID: KE-2026-8812'
+                drafted_complaint: 'FORMAL BILLING DISPUTE NOTICE\nUnder NEPRA Consumer Service Manual (CSM) Clause 11\nTo: Billing Dispute Resolution Cell, K-Electric Limited\nRe: Unauthorized Overcharge on 312 Units (Tracking: KE-2026-8812)\n\nAudit reveals statutory charges of Rs. 8,921.42 versus billed amount of Rs. 14,850.00, representing an unauthorized overbilling of Rs. 5,928.58 (+66.5% over NEPRA statutory tariff).\n\nخلاصہ برائے صارفین تنازعات سیل:\nنیپرا کے منظور شدہ ٹیرف شیڈول کے مطابق 312 یونٹس پر اصل بل 8,921.42 روپے بنتا ہے جبکہ کے-الیکٹرک نے غیر قانونی طور پر 14,850 روپے بل کیا ہے۔ 5,928.58 روپے کا اضافی بل فوری طور پر درست کیا جائے اور ترمیمی چالان جاری کیا جائے۔\n\nTracking ID: KE-2026-8812'
               });
             }}
             className="btn btn-outline"
             style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem' }}
           >
-            Scenario 2: KE Overcharge (+Rs. 4,126)
+            Scenario 2: KE Overcharge (+Rs. 5,928)
           </button>
 
           <button

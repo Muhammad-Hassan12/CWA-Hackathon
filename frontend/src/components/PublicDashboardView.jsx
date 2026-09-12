@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import AgentTraceModal from './AgentTraceModal';
+import FormattedDocument from './FormattedDocument';
 import { fetchDashboardStats, fetchDashboardFeed, lookupTracking, markReportResolved, API_URL } from '../lib/api';
 import { formatDraftText } from '../lib/formatText';
 
@@ -563,52 +564,79 @@ export default function PublicDashboardView() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {(stats?.authority_scorecard || []).map((auth) => (
-                <div
-                  key={auth.code}
-                  style={{
-                    padding: '0.75rem',
-                    border: '1px solid var(--line)',
-                    borderRadius: 'var(--radius-sm)',
-                    background: '#FFFFFF',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                    <strong style={{ fontSize: '0.88rem', color: 'var(--ink)' }}>{auth.name}</strong>
-                    <span className="mono-num text-verified" style={{ fontWeight: 700, fontSize: '0.82rem' }}>
-                      {auth.response_rate} VERIFIED
-                    </span>
-                  </div>
-                  <div className="text-muted" style={{ fontSize: '0.76rem', marginBottom: '0.5rem' }}>
-                    Mandate: {auth.jurisdiction}
-                  </div>
-
-                  {/* Meter bar */}
-                  <div style={{ height: '4px', background: '#EAE8DF', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        height: '100%',
-                        width: auth.response_rate,
-                        background: 'var(--ink)',
-                      }}
-                    />
-                  </div>
-
+              {(stats?.authority_scorecard || []).map((auth) => {
+                const authUrls = {
+                  SSWMB: 'https://sswmb.gos.pk',
+                  KWSC: 'https://www.kwsc.gos.pk',
+                  KMC: 'https://kmc.gos.pk',
+                  CBC: 'https://cbc.gov.pk',
+                  KE: 'https://www.ke.com.pk',
+                };
+                const portalUrl = authUrls[auth.code] || 'https://sindh.gov.pk';
+                return (
                   <div
+                    key={auth.code}
                     style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginTop: '0.45rem',
-                      fontSize: '0.74rem',
-                      color: 'var(--muted)',
+                      padding: '0.75rem',
+                      border: '1px solid var(--line)',
+                      borderRadius: 'var(--radius-sm)',
+                      background: '#FFFFFF',
                     }}
                   >
-                    <span>Total Cases: <strong style={{ color: 'var(--ink)' }}>{auth.total_cases}</strong></span>
-                    <span>Drafted Petitions: <strong style={{ color: 'var(--ink)' }}>{auth.drafted_cases}</strong></span>
-                    <span>Backing: <strong style={{ color: 'var(--verified)' }}>⊙ {auth.corroborations}</strong></span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <a
+                        href={portalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '0.88rem',
+                          fontWeight: 600,
+                          color: 'var(--ink)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          textDecoration: 'none',
+                        }}
+                        title="Open official department website"
+                      >
+                        {auth.name}
+                        <ExternalLink size={11} color="var(--muted)" />
+                      </a>
+                      <span className="mono-num text-verified" style={{ fontWeight: 700, fontSize: '0.82rem' }}>
+                        {auth.response_rate} VERIFIED
+                      </span>
+                    </div>
+                    <div className="text-muted" style={{ fontSize: '0.76rem', marginBottom: '0.5rem' }}>
+                      Mandate: {auth.jurisdiction}
+                    </div>
+
+                    {/* Meter bar */}
+                    <div style={{ height: '4px', background: '#EAE8DF', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          height: '100%',
+                          width: auth.response_rate,
+                          background: 'var(--ink)',
+                        }}
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginTop: '0.45rem',
+                        fontSize: '0.74rem',
+                        color: 'var(--muted)',
+                      }}
+                    >
+                      <span>Total Cases: <strong style={{ color: 'var(--ink)' }}>{auth.total_cases}</strong></span>
+                      <span>Drafted Petitions: <strong style={{ color: 'var(--ink)' }}>{auth.drafted_cases}</strong></span>
+                      <span>Backing: <strong style={{ color: 'var(--verified)' }}>⊙ {auth.corroborations}</strong></span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -785,21 +813,9 @@ export default function PublicDashboardView() {
                 {/* Drafted Complaint Statement */}
                 <div>
                   <h4 style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>Official Statutory Petition Draft</h4>
-                  <pre
-                    style={{
-                      background: 'var(--paper)',
-                      border: '1px solid var(--line)',
-                      padding: '1rem',
-                      borderRadius: 'var(--radius-sm)',
-                      fontSize: '0.82rem',
-                      lineHeight: 1.45,
-                      whiteSpace: 'pre-wrap',
-                      maxHeight: '280px',
-                      overflowY: 'auto',
-                    }}
-                  >
-                    {formatDraftText(lookupResult.data.drafted_complaint) || 'Statutory notice is currently undergoing second-agent verification review.'}
-                  </pre>
+                  <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
+                    <FormattedDocument text={formatDraftText(lookupResult.data.drafted_complaint) || 'Statutory notice is currently undergoing second-agent verification review.'} />
+                  </div>
                 </div>
 
                 {/* Citizen Self-Report Resolution Section */}

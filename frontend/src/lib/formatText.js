@@ -16,7 +16,7 @@ export function formatDraftText(rawText) {
     return String(rawText);
   }
 
-  const trimmed = rawText.trim();
+  let trimmed = rawText.trim();
 
   // If the text is a JSON string of blocks e.g. [{"type":"text","text":"..."}] or {"text":"..."}
   if (
@@ -30,23 +30,38 @@ export function formatDraftText(rawText) {
           .filter((p) => p && typeof p === 'object' && p.text)
           .map((p) => p.text);
         if (textParts.length > 0) {
-          return textParts.join('').trim();
+          trimmed = textParts.join('').trim();
         }
       } else if (parsed && typeof parsed === 'object' && parsed.text) {
-        return String(parsed.text).trim();
+        trimmed = String(parsed.text).trim();
       }
     } catch {
       // Fallback: extract text using regex if JSON parse fails due to trailing extras
       const match = trimmed.match(/"text"\s*:\s*"((?:\\.|[^"\\])*)"/);
       if (match && match[1]) {
         try {
-          return JSON.parse(`"${match[1]}"`).trim();
+          trimmed = JSON.parse(`"${match[1]}"`).trim();
         } catch {
-          return match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').trim();
+          trimmed = match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').trim();
         }
       }
     }
   }
 
-  return rawText;
+  return trimmed;
+}
+
+/**
+ * Strips raw markdown asterisks and symbols for pristine clipboard copy.
+ */
+export function stripMarkdownAsterisks(rawText) {
+  const text = formatDraftText(rawText);
+  if (!text) return '';
+  return text
+    .replace(/\*\*\*(.*?)\*\*\*/g, '$1')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^[ \t]*\*[ \t]+/gm, '• ')
+    .replace(/^\s*\*\*\*\s*$/gm, '----------------------------------------')
+    .trim();
 }
