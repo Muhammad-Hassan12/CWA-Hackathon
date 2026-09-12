@@ -330,9 +330,9 @@ export default function PublicDashboardView() {
       </div>
 
       {/* Main Grid: Live Register Table (Left 7 cols) & Authority Scorecard (Right 5 cols) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+      <div className="dashboard-main-grid">
         {/* Left Column: Live Public Feed */}
-        <div className="ledger-panel" style={{ flex: '1 1 60%' }}>
+        <div className="ledger-panel" style={{ minWidth: 0, overflow: 'hidden' }}>
           <div className="ledger-panel-header" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Live Public Evidences</h3>
@@ -400,7 +400,31 @@ export default function PublicDashboardView() {
               filteredFeed.map((item) => {
                 const isExpanded = expandedId === item.tracking_id;
                 const isBill = item.kind === 'bill_audit';
-                const isFlagged = item.status === 'flagged_overcharge' || item.severity === 'critical';
+
+                // Format status badge text concisely so it never causes row overflow
+                let badgeText = 'LOGGED';
+                let isBadgeVerified = false;
+                if (isBill) {
+                  if (item.status === 'flagged_overcharge') {
+                    badgeText = item.overcharge_amount ? `FLAGGED +Rs.${Math.round(item.overcharge_amount).toLocaleString()}` : 'FLAGGED';
+                  } else {
+                    badgeText = 'VERIFIED';
+                    isBadgeVerified = true;
+                  }
+                } else {
+                  if (item.status === 'drafted') {
+                    badgeText = 'DRAFTED';
+                    isBadgeVerified = true;
+                  } else if (item.status === 'confirmed_duplicate') {
+                    badgeText = 'DUPLICATE';
+                  } else if (item.status === 'resolved_self_reported') {
+                    badgeText = 'RESOLVED';
+                    isBadgeVerified = true;
+                  } else {
+                    badgeText = (item.status || 'VERIFIED').toUpperCase().replace(/_/g, ' ');
+                    isBadgeVerified = item.status === 'verified';
+                  }
+                }
 
                 return (
                   <div
@@ -413,48 +437,50 @@ export default function PublicDashboardView() {
                   >
                     <div
                       style={{
-                        padding: '0.85rem 0.5rem',
+                        padding: '0.75rem 0.5rem',
                         display: 'grid',
-                        gridTemplateColumns: '120px 1fr auto',
+                        gridTemplateColumns: '100px minmax(0, 1fr) auto',
                         alignItems: 'center',
-                        gap: '0.75rem',
+                        gap: '0.6rem',
                         cursor: 'pointer',
                       }}
                       onClick={() => setExpandedId(isExpanded ? null : item.tracking_id)}
                     >
                       {/* Column 1: Tracking ID */}
-                      <div>
+                      <div style={{ minWidth: '100px', flexShrink: 0 }}>
                         <span
                           className="mono-num tracking-id"
                           style={{
                             fontWeight: 600,
-                            fontSize: '0.82rem',
+                            fontSize: '0.8rem',
                             display: 'block',
                             color: 'var(--ink)',
+                            whiteSpace: 'nowrap',
                           }}
                         >
                           {item.tracking_id}
                         </span>
-                        <span className="mono-num text-muted" style={{ fontSize: '0.7rem' }}>
+                        <span className="mono-num text-muted" style={{ fontSize: '0.68rem' }}>
                           {item.created_at ? new Date(item.created_at).toLocaleDateString('en-GB') : '2026-03'}
                         </span>
                       </div>
 
                       {/* Column 2: Title & Details */}
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                          {isBill ? <Receipt size={14} color="var(--ink)" /> : <AlertTriangle size={14} color="var(--ink)" />}
-                          <strong style={{ fontSize: '0.88rem', color: 'var(--ink)' }}>{item.title}</strong>
+                      <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflow: 'hidden' }}>
+                          {isBill ? <Receipt size={13} color="var(--ink)" style={{ flexShrink: 0 }} /> : <AlertTriangle size={13} color="var(--ink)" style={{ flexShrink: 0 }} />}
+                          <strong style={{ fontSize: '0.85rem', color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.title}
+                          </strong>
                         </div>
                         <div
                           className="text-muted"
                           style={{
-                            fontSize: '0.8rem',
-                            marginTop: '0.2rem',
+                            fontSize: '0.78rem',
+                            marginTop: '0.15rem',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            maxWidth: '380px',
                           }}
                         >
                           {item.description}
@@ -462,35 +488,23 @@ export default function PublicDashboardView() {
                       </div>
 
                       {/* Column 3: Status Stamp & Actions */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
                         {item.confirm_count > 1 && (
                           <span
                             className="mono-num text-verified"
-                            style={{ fontSize: '0.75rem', fontWeight: 600 }}
+                            style={{ fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}
                             title="Citizens who confirmed same issue"
                           >
                             ⊙ {item.confirm_count}
                           </span>
                         )}
 
-                        {isBill ? (
-                          item.status === 'flagged_overcharge' ? (
-                            <span className="badge-flag" style={{ fontSize: '0.7rem' }}>
-                              FLAGGED +Rs.{item.overcharge_amount}
-                            </span>
-                          ) : (
-                            <span className="stamp-verified" style={{ transform: 'none', fontSize: '0.7rem' }}>
-                              VERIFIED
-                            </span>
-                          )
-                        ) : (
-                          <span
-                            className={item.status === 'drafted' ? 'stamp-verified' : 'badge-flag'}
-                            style={{ transform: 'none', fontSize: '0.7rem' }}
-                          >
-                            {item.status.toUpperCase()}
-                          </span>
-                        )}
+                        <span
+                          className={isBadgeVerified ? 'stamp-verified' : 'badge-flag'}
+                          style={{ transform: 'none', fontSize: '0.68rem', padding: '0.12rem 0.4rem', whiteSpace: 'nowrap' }}
+                        >
+                          {badgeText}
+                        </span>
 
                         <button
                           onClick={(e) => {
@@ -498,7 +512,7 @@ export default function PublicDashboardView() {
                             openLookupFor(item.tracking_id);
                           }}
                           className="btn btn-outline"
-                          style={{ padding: '0.25rem 0.45rem', fontSize: '0.72rem' }}
+                          style={{ padding: '0.2rem 0.35rem', fontSize: '0.7rem' }}
                           title="Open Full Record Audit"
                         >
                           <ExternalLink size={12} />
@@ -551,7 +565,7 @@ export default function PublicDashboardView() {
         </div>
 
         {/* Right Column: Authority Accountability Scorecard & Breakdown */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
           {/* Authority Scorecard */}
           <div className="ledger-panel">
             <div className="ledger-panel-header">
