@@ -1,0 +1,239 @@
+/* ==========================================================================
+   Nigraan (نگران) — Public Ledger Visual Identity (§6)
+   Cool paper white, stamped ink navy, hairline rules, tabular figures
+   ========================================================================== */
+
+:root {
+  /* Public Ledger Color Tokens */
+  --ink: #14213D;
+  --paper: #F6F5F0;
+  --verified: #2F6F4E;
+  --flag: #A6432B;
+  --line: #CFCABC;
+  --muted: #5B6570;
+
+  /* Typography Stacks */
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", Menlo, Monaco, Consolas, monospace;
+
+  /* Border radius strictly small (2-4px) */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+/* Reset & Document Foundation */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100vh;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Hierarchy */
+h1, h2, h3, h4, .headline {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.25rem; }
+
+p {
+  color: var(--ink);
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.text-verified {
+  color: var(--verified);
+}
+
+.text-flag {
+  color: var(--flag);
+}
+
+/* Tabular Mono for numbers and tracking codes */
+.mono-num, code, pre, .tracking-id, .math-fig {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline Ledger Rules */
+hr, .rule {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 1.5rem 0;
+}
+
+/* Containers and Registers */
+.ledger-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.ledger-header {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 1.25rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.ledger-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ledger-brand h1 {
+  font-size: 2.2rem;
+  margin: 0;
+}
+
+.ledger-tagline {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+/* Ledger Panels (Sharp, border-defined, NO drop shadows, NO glassmorphism) */
+.ledger-panel {
+  background: #FFFFFF;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ledger-panel-header {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Register Table / Row List */
+.ledger-row {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+  gap: 1rem;
+}
+
+.ledger-row:last-child {
+  border-bottom: none;
+}
+
+/* Earned Stamp Mark (Rotated -6deg, verified green ink) */
+.stamp-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--verified);
+  border: 1.5px solid var(--verified);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transform: rotate(-6deg);
+  background: rgba(47, 111, 78, 0.05);
+}
+
+.badge-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--flag);
+  border: 1px solid var(--flag);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(166, 67, 43, 0.05);
+}
+
+/* Buttons (Functional, squared, no gradient) */
+.btn {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-outline:hover {
+  background: rgba(20, 33, 61, 0.04);
+}
+
+/* Form Controls */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  color: var(--ink);
+}
+
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+}
