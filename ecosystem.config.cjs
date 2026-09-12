@@ -20,5 +20,11 @@ module.exports = {
         NODE_ENV: "development",
       },
     },
+    {
+      name: "nigraan-tunnel",
+      script: "/bin/bash",
+      args: "/home/Hassan/CWA/backend/scripts/start_tunnel.sh",
+      interpreter: "none",
+    },
   ],
 };
