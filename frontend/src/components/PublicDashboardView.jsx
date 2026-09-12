@@ -23,6 +23,7 @@ import {
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import AgentTraceModal from './AgentTraceModal';
 import { fetchDashboardStats, fetchDashboardFeed, lookupTracking, markReportResolved, API_URL } from '../lib/api';
+import { formatDraftText } from '../lib/formatText';
 
 export default function PublicDashboardView() {
   const [stats, setStats] = useState(null);
@@ -797,7 +798,7 @@ export default function PublicDashboardView() {
                       overflowY: 'auto',
                     }}
                   >
-                    {lookupResult.data.drafted_complaint || 'Statutory notice is currently undergoing second-agent verification review.'}
+                    {formatDraftText(lookupResult.data.drafted_complaint) || 'Statutory notice is currently undergoing second-agent verification review.'}
                   </pre>
                 </div>
 

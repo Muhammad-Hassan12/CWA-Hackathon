@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Optional
 from app.agents.state import NigraanState
-from app.agents.llm_client import invoke_llm, clean_json_output
+from app.agents.llm_client import invoke_llm, clean_json_output, extract_text_from_llm_response
 from app.services.tariff_engine import compute_k_electric_bill, compute_ssgc_bill
 from app.core.supabase import get_supabase_client
 
@@ -154,8 +154,9 @@ Draft the document now:
         system_prompt="You draft authoritative utility billing dispute claims in English and Urdu. Cite exact mathematical discrepancy figures.",
         temperature=0.2,
     )
+    clean_draft = extract_text_from_llm_response(draft)
 
-    return {"drafted_complaint": draft}
+    return {"drafted_complaint": clean_draft}
 
 
 async def critique_bill_node(state: NigraanState) -> Dict[str, Any]:
@@ -201,7 +202,7 @@ async def finalize_bill_node(state: NigraanState) -> Dict[str, Any]:
     verdict = state.get("verdict", "correct")
     expected = state.get("amount_expected")
     breakdown = state.get("math_breakdown")
-    complaint = state.get("drafted_complaint")
+    complaint = extract_text_from_llm_response(state.get("drafted_complaint")) if state.get("drafted_complaint") else None
     units = state.get("units_billed")
     billed = state.get("amount_billed")
     provider = state.get("provider", "K-Electric")

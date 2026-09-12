@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Copy, ShieldCheck, AlertTriangle, ArrowLeft, Clock, GitBranch } from 'lucide-react';
 import AgentTraceModal from './AgentTraceModal';
+import { formatDraftText } from '../lib/formatText';
 
 export default function BillAuditReceipt({ bill, onReset }) {
   const [copied, setCopied] = useState(false);
@@ -23,9 +24,11 @@ export default function BillAuditReceipt({ bill, onReset }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const cleanDispute = formatDraftText(bill.drafted_complaint);
+
   const copyDispute = () => {
-    if (bill.drafted_complaint) {
-      navigator.clipboard.writeText(bill.drafted_complaint);
+    if (cleanDispute) {
+      navigator.clipboard.writeText(cleanDispute);
       setDisputeCopied(true);
       setTimeout(() => setDisputeCopied(false), 2000);
     }
@@ -188,7 +191,7 @@ export default function BillAuditReceipt({ bill, onReset }) {
       ) : null}
 
       {/* Drafted Legal Dispute Claim (if flagged) */}
-      {isFlagged && bill.drafted_complaint && (
+      {isFlagged && cleanDispute && (
         <div style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <strong style={{ fontSize: '0.95rem' }}>NEPRA / IBC Billing Dispute Claim (Ready for Submission)</strong>
@@ -211,7 +214,7 @@ export default function BillAuditReceipt({ bill, onReset }) {
               color: 'var(--ink)',
             }}
           >
-            {bill.drafted_complaint}
+            {cleanDispute}
           </pre>
         </div>
       )}

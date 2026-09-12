@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import AgentTraceModal from './AgentTraceModal';
 import { markReportResolved } from '../lib/api';
+import { formatDraftText } from '../lib/formatText';
 
 export default function ReportReceipt({ report, onReset }) {
   const [copied, setCopied] = useState(false);
@@ -28,9 +29,11 @@ export default function ReportReceipt({ report, onReset }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const cleanComplaint = formatDraftText(report.drafted_complaint);
+
   const copyComplaint = () => {
-    if (report.drafted_complaint) {
-      navigator.clipboard.writeText(report.drafted_complaint);
+    if (cleanComplaint) {
+      navigator.clipboard.writeText(cleanComplaint);
       setComplaintCopied(true);
       setTimeout(() => setComplaintCopied(false), 2000);
     }
@@ -156,7 +159,7 @@ export default function ReportReceipt({ report, onReset }) {
           )}
         </div>
 
-        {report.drafted_complaint ? (
+        {cleanComplaint ? (
           <pre
             style={{
               background: '#FFFFFF',
@@ -170,7 +173,7 @@ export default function ReportReceipt({ report, onReset }) {
               color: 'var(--ink)',
             }}
           >
-            {report.drafted_complaint}
+            {cleanComplaint}
           </pre>
         ) : (
           <div style={{ border: '1px solid var(--line)', padding: '1.5rem', textAlign: 'center', borderRadius: 'var(--radius-sm)' }}>

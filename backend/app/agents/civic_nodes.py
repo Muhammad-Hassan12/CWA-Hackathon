@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Optional
 from app.agents.state import NigraanState
-from app.agents.llm_client import invoke_llm, clean_json_output
+from app.agents.llm_client import invoke_llm, clean_json_output, extract_text_from_llm_response
 from app.core.supabase import get_supabase_client
 
 logger = logging.getLogger(__name__)
@@ -242,8 +242,9 @@ Draft the document now:
         system_prompt="You draft formal municipal complaints in English and Urdu. Maintain institutional gravity.",
         temperature=0.2
     )
+    clean_draft = extract_text_from_llm_response(draft)
 
-    return {"drafted_complaint": draft}
+    return {"drafted_complaint": clean_draft}
 
 
 async def critique_node(state: NigraanState) -> Dict[str, Any]:
@@ -317,13 +318,14 @@ async def finalize_report_node(state: NigraanState) -> Dict[str, Any]:
 
     matched_auth = state.get("matched_authority") or {}
     matched_id = matched_auth.get("id")
+    clean_complaint = extract_text_from_llm_response(state.get("drafted_complaint"))
 
     if client:
         try:
             update_payload = {
                 "issue_type": state.get("issue_type"),
                 "severity": state.get("severity"),
-                "drafted_complaint": state.get("drafted_complaint"),
+                "drafted_complaint": clean_complaint,
                 "status": final_status,
             }
             if matched_id:

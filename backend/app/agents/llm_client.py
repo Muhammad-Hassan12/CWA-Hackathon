@@ -7,10 +7,72 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
-def clean_json_output(raw_text: str) -> Dict[str, Any]:
+def extract_text_from_llm_response(content: Any) -> str:
     """
-    Extracts JSON from an LLM response even if enclosed in markdown code blocks.
+    Extracts clean plain text string from any LLM response format:
+    - plain string
+    - list of LangChain content blocks: [{'type': 'text', 'text': '...'}, ...]
+    - dict with 'text' or 'content' keys
+    - stringified JSON containing [{'type':'text','text':'...'}] and 'extras' signatures.
     """
+    if content is None:
+        return ""
+
+    if isinstance(content, str):
+        text = content
+    elif isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                if item.get("type") == "text" and "text" in item:
+                    parts.append(str(item["text"]))
+                elif "text" in item:
+                    parts.append(str(item["text"]))
+                elif "content" in item:
+                    parts.append(str(item["content"]))
+            elif hasattr(item, "text"):
+                parts.append(str(item.text))
+        text = "".join(parts) if parts else str(content)
+    elif isinstance(content, dict):
+        text = content.get("text") or content.get("content") or str(content)
+    elif hasattr(content, "text"):
+        text = str(content.text)
+    else:
+        text = str(content)
+
+    # Strip any accidental JSON block wrapping e.g. [{"type":"text","text":"..."}]
+    trimmed = text.strip()
+    if (trimmed.startswith("[{") and '"text"' in trimmed) or (trimmed.startswith('{"type":') and '"text"' in trimmed):
+        try:
+            parsed = json.loads(trimmed)
+            if isinstance(parsed, list):
+                extracted = []
+                for p in parsed:
+                    if isinstance(p, dict) and "text" in p:
+                        extracted.append(str(p["text"]))
+                if extracted:
+                    text = "".join(extracted)
+            elif isinstance(parsed, dict) and "text" in parsed:
+                text = str(parsed["text"])
+        except Exception:
+            # If parsing fails, use regex to extract content inside "text":"..."
+            matches = re.findall(r'"text"\s*:\s*"((?:\\.|[^"\\])*)"', trimmed)
+            if matches:
+                try:
+                    text = "".join(json.loads(f'"{m}"') for m in matches)
+                except Exception:
+                    pass
+
+    return text.strip()
+
+
+def clean_json_output(raw_input: Any) -> Dict[str, Any]:
+    """
+    Extracts JSON from an LLM response even if enclosed in markdown code blocks or content objects.
+    """
+    raw_text = extract_text_from_llm_response(raw_input)
     cleaned = raw_text.strip()
     # Remove markdown ```json ... ``` blocks
     if "```" in cleaned:
@@ -39,7 +101,9 @@ async def invoke_llm(
     Invokes the LLM using a multi-provider fallback chain:
     1. Groq (llama-3.3-70b-versatile or llama-3.2-11b-vision-preview)
     2. Google Gemini Flash (gemini-1.5-flash)
-    3. Rule-based civic fallback generator if both APIs encounter 429/timeout/credentials missing.
+    3. Alibaba Cloud (qwen-plus / DashScope)
+    4. Rule-based civic fallback generator if both APIs encounter 429/timeout/credentials missing.
+    Always returns clean string text.
     """
     # 1. Try Groq (User preferred: qwen/qwen3.6-27b or vision model)
     if settings.GROQ_API_KEY and not settings.GROQ_API_KEY.startswith("gsk_your"):
@@ -62,8 +126,9 @@ async def invoke_llm(
                     messages.append(SystemMessage(content=system_prompt))
                 messages.append(HumanMessage(content=prompt))
                 res = await asyncio.wait_for(llm.ainvoke(messages), timeout=8.0)
+                clean_text = extract_text_from_llm_response(res.content)
                 logger.info(f"LLM response from Groq ({model_name})")
-                return res.content
+                return clean_text
             except Exception as e:
                 logger.warning(f"Groq model {model_name} invocation failed ({e}), trying next candidate...")
 
@@ -86,8 +151,9 @@ async def invoke_llm(
                     messages.append(SystemMessage(content=system_prompt))
                 messages.append(HumanMessage(content=prompt))
                 res = await asyncio.wait_for(llm.ainvoke(messages), timeout=8.0)
+                clean_text = extract_text_from_llm_response(res.content)
                 logger.info(f"LLM response from Gemini ({g_model})")
-                return res.content
+                return clean_text
             except Exception as e:
                 logger.warning(f"Gemini {g_model} invocation failed ({e}), trying fallback...")
 
@@ -113,13 +179,14 @@ async def invoke_llm(
                 resp = await client.post("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", headers=headers, json=payload)
                 if resp.status_code == 200:
                     data = resp.json()
-                    content = data["choices"][0]["message"]["content"]
+                    raw_content = data["choices"][0]["message"]["content"]
+                    clean_text = extract_text_from_llm_response(raw_content)
                     logger.info(f"LLM response from Alibaba ({settings.ALIBABA_MODEL})")
-                    return content
+                    return clean_text
         except Exception as e:
             logger.warning(f"Alibaba invocation failed: {e}")
 
-    # 3. Deterministic civic fallback (ensures zero demo failure even if offline)
+    # 4. Deterministic civic fallback (ensures zero demo failure even if offline)
     logger.info("Using deterministic civic fallback generator")
     return generate_deterministic_civic_response(prompt)
 
