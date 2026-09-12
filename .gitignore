@@ -1,5 +1,7 @@
 # Python
+**/.venv/
 .venv/
+**/__pycache__/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,7 +10,9 @@ __pycache__/
 *.egg-info/
 
 # Node / Frontend
+**/node_modules/
 node_modules/
+**/dist/
 dist/
 .env.local
 .env.*.local
@@ -17,6 +21,8 @@ dist/
 .env
 .env.*
 *.env
+**/.env
+**/*.env
 backend/.env
 frontend/.env
 
