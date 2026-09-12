@@ -8,8 +8,6 @@ import BillAuditReceipt from './components/BillAuditReceipt';
 import ProcedureGuideView from './components/ProcedureGuideView';
 import PublicDashboardView from './components/PublicDashboardView';
 import { fetchHealth, API_URL } from './lib/api';
-import { isSupabaseConfigured } from './lib/supabase';
-import { Zap, BookOpen, ShieldCheck, MapPin, AlertCircle } from 'lucide-react';
 
 export default function App() {
   const [currentMode, setCurrentMode] = useState('civic_issue');
@@ -30,7 +28,9 @@ export default function App() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_URL}/api/reports/${activeReport.tracking_id}`);
+        const res = await fetch(`${API_URL}/api/reports/${activeReport.tracking_id}`, {
+          headers: { 'ngrok-skip-browser-warning': 'true' },
+        });
         if (res.ok) {
           const updated = await res.json();
           if (updated.status === 'drafted' || updated.status === 'confirmed_duplicate') {
@@ -53,7 +53,9 @@ export default function App() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_URL}/api/bills/${activeBill.tracking_id}`);
+        const res = await fetch(`${API_URL}/api/bills/${activeBill.tracking_id}`, {
+          headers: { 'ngrok-skip-browser-warning': 'true' },
+        });
         if (res.ok) {
           const updated = await res.json();
           if (updated.verdict && updated.verdict !== 'verifying') {
@@ -131,7 +133,7 @@ export default function App() {
                   units_billed: 312,
                   tariff_category: 'Residential-Unprotected',
                   energy_charges: 8392.5,
-                  fixed_charges: 400.0,
+                  fixed_charge: 400.0,
                   electricity_duty: 131.89,
                   tv_fee: 35.0,
                   gst: 1582.65,

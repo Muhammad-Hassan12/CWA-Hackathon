@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import AgentTraceModal from './AgentTraceModal';
-import { markReportResolved, API_URL } from '../lib/api';
+import { fetchDashboardStats, fetchDashboardFeed, lookupTracking, markReportResolved, API_URL } from '../lib/api';
 
 export default function PublicDashboardView() {
   const [stats, setStats] = useState(null);
@@ -51,16 +51,14 @@ export default function PublicDashboardView() {
 
     try {
       // 1. Fetch Stats
-      const statsRes = await fetch(`${apiUrl}/api/dashboard/stats`);
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
+      const statsData = await fetchDashboardStats();
+      if (statsData) {
         setStats(statsData);
       }
 
       // 2. Fetch Feed
-      const feedRes = await fetch(`${apiUrl}/api/dashboard/feed?limit=40`);
-      if (feedRes.ok) {
-        const feedData = await feedRes.json();
+      const feedData = await fetchDashboardFeed(40);
+      if (feedData && feedData.length >= 0) {
         setFeed(feedData);
       }
     } catch (err) {
@@ -116,16 +114,10 @@ export default function PublicDashboardView() {
     setShowLookupModal(true);
 
     try {
-      const res = await fetch(`${apiUrl}/api/dashboard/lookup/${encodeURIComponent(lookupId.trim().toUpperCase())}`);
-      if (res.ok) {
-        const data = await res.json();
-        setLookupResult(data);
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        setLookupError(errData.detail || `Tracking ID "${lookupId}" not found in Public Register.`);
-      }
+      const data = await lookupTracking(lookupId);
+      setLookupResult(data);
     } catch (err) {
-      setLookupError('Network error connecting to Nigraan ledger API.');
+      setLookupError(err.message || 'Tracking ID could not be retrieved from Public Register.');
     } finally {
       setLookupLoading(false);
     }
@@ -138,13 +130,9 @@ export default function PublicDashboardView() {
     setLookupError(null);
     setLookupResult(null);
 
-    fetch(`${apiUrl}/api/dashboard/lookup/${encodeURIComponent(tId)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Not found');
-        return res.json();
-      })
+    lookupTracking(tId)
       .then((data) => setLookupResult(data))
-      .catch(() => setLookupError(`Tracking ID "${tId}" could not be retrieved.`))
+      .catch((err) => setLookupError(err.message || `Tracking ID "${tId}" could not be retrieved.`))
       .finally(() => setLookupLoading(false));
   };
 

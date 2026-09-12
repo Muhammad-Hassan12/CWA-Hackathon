@@ -14,7 +14,12 @@ import {
   X,
   Search,
 } from 'lucide-react';
-import { API_URL } from '../lib/api';
+import { fetchProcedures, submitExploitationSignal, API_URL } from '../lib/api';
+
+const TUNNEL_HEADERS = {
+  'Content-Type': 'application/json',
+  'ngrok-skip-browser-warning': 'true',
+};
 
 export default function ProcedureGuideView() {
   const [procedures, setProcedures] = useState([]);
@@ -34,15 +39,12 @@ export default function ProcedureGuideView() {
 
   // Load procedures from backend / Supabase
   useEffect(() => {
-    const fetchProcedures = async () => {
+    const loadProcedures = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/procedures`);
-        if (res.ok) {
-          const data = await res.json();
+        const data = await fetchProcedures();
+        if (data && data.length > 0) {
           setProcedures(data);
-          if (data.length > 0) {
-            setSelectedId(data[0].id);
-          }
+          setSelectedId(data[0].id);
         }
       } catch (err) {
         console.warn('Error fetching procedures:', err);
@@ -50,7 +52,7 @@ export default function ProcedureGuideView() {
         setLoading(false);
       }
     };
-    fetchProcedures();
+    loadProcedures();
   }, []);
 
   const activeProcedure = procedures.find((p) => p.id === selectedId) || procedures[0];
@@ -72,7 +74,7 @@ export default function ProcedureGuideView() {
     try {
       const res = await fetch(`${API_URL}/api/procedures/lookup`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: TUNNEL_HEADERS,
         body: JSON.stringify({ query: searchQuery }),
       });
 
@@ -103,25 +105,19 @@ export default function ProcedureGuideView() {
     setSignalSubmitting(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/exploitation-signal`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          procedure_id: activeProcedure?.id,
-          reported_amount: signalAmount ? parseFloat(signalAmount) : null,
-          note: signalNote,
-        }),
+      await submitExploitationSignal({
+        procedure_id: activeProcedure?.id,
+        reported_amount: signalAmount ? parseFloat(signalAmount) : null,
+        note: signalNote,
       });
 
-      if (res.ok) {
-        setSignalSuccess(true);
-        setTimeout(() => {
-          setShowSignalModal(false);
-          setSignalSuccess(false);
-          setSignalAmount('');
-          setSignalNote('');
-        }, 2000);
-      }
+      setSignalSuccess(true);
+      setTimeout(() => {
+        setShowSignalModal(false);
+        setSignalSuccess(false);
+        setSignalAmount('');
+        setSignalNote('');
+      }, 2000);
     } catch (err) {
       alert('Failed to submit signal. Please try again.');
     } finally {
@@ -247,7 +243,7 @@ export default function ProcedureGuideView() {
               <a
                 href={activeProcedure.source_url}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',

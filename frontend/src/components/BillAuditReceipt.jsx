@@ -10,6 +10,12 @@ export default function BillAuditReceipt({ bill, onReset }) {
   const breakdown = bill.math_breakdown || {};
   const isFlagged = bill.verdict === 'flagged';
   const isProcessing = !bill.amount_expected && bill.verdict === 'verifying';
+  // Derive discrepancy from math_breakdown when top-level field is absent (pre-polling state)
+  const discrepancy = bill.discrepancy ?? breakdown.discrepancy ?? (
+    (bill.amount_billed && bill.amount_expected)
+      ? Math.max(0, bill.amount_billed - bill.amount_expected)
+      : 0
+  );
 
   const copyTrackingId = () => {
     navigator.clipboard.writeText(bill.tracking_id);
@@ -111,7 +117,7 @@ export default function BillAuditReceipt({ bill, onReset }) {
         <div style={{ border: '1px solid var(--line)', padding: '0.85rem', borderRadius: 'var(--radius-sm)' }}>
           <div className="text-muted" style={{ fontSize: '0.75rem' }}>DISCREPANCY</div>
           <strong className="mono-num" style={{ fontSize: '1.1rem', color: isFlagged ? 'var(--flag)' : 'var(--verified)' }}>
-            {isFlagged ? `+Rs. ${(bill.discrepancy || breakdown.discrepancy || 0).toLocaleString()}` : 'Rs. 0.00 (Within margin)'}
+            {isFlagged ? `+Rs. ${(discrepancy || 0).toLocaleString()}` : 'Rs. 0.00 (Within margin)'}
           </strong>
         </div>
       </div>

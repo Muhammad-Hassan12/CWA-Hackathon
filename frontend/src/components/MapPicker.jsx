@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -50,19 +50,25 @@ function LocationMarker({ position, setPosition, onAreaChange }) {
 
 export default function MapPicker({ position, setPosition, onAreaChange }) {
   const center = position || [24.8607, 67.0011];
+  const [tileError, setTileError] = useState(false);
 
   return (
     <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-      <div style={{ height: '220px', width: '100%' }}>
+      <div style={{ height: '220px', width: '100%', position: 'relative' }}>
         <MapContainer
           center={center}
           zoom={12}
           scrollWheelZoom={false}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: '100%', width: '100%', background: '#F4F1EA' }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            eventHandlers={{
+              tileerror: () => {
+                setTileError(true);
+              },
+            }}
           />
           <LocationMarker
             position={position}
@@ -70,9 +76,28 @@ export default function MapPicker({ position, setPosition, onAreaChange }) {
             onAreaChange={onAreaChange}
           />
         </MapContainer>
+
+        {tileError && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '0.5rem',
+              right: '0.5rem',
+              background: 'rgba(255, 255, 255, 0.92)',
+              border: '1px solid var(--line)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.25rem 0.5rem',
+              fontSize: '0.72rem',
+              color: 'var(--muted)',
+              zIndex: 1000,
+            }}
+          >
+            Offline tile cache active · Click anywhere to place coordinate pin
+          </div>
+        )}
       </div>
       <div style={{ padding: '0.4rem 0.75rem', background: '#FFFFFF', borderTop: '1px solid var(--line)', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
-        <span className="text-muted">Click map to pin precise hazard location</span>
+        <span className="text-muted">Click map to pin precise hazard coordinates</span>
         {position && (
           <span className="mono-num" style={{ color: 'var(--ink)' }}>
             {position[0].toFixed(4)}, {position[1].toFixed(4)}
